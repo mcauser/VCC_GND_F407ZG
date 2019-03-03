@@ -74,6 +74,7 @@ make BOARD=VCC_GND_F407ZG
 * [STM32F407ZGT6 mini schematics](docs/STM32F407ZGT6_schematics.pdf)
 * [STM32F407ZGT6 mini PCB](docs/STM32F407ZGT6_mini.pdf)
 * [STM32F4 alternate function mapping](docs/STM32F4-AF-mapping.pdf)
+* [Smaller STM32F407VET6 mini board](https://github.com/mcauser/VCC_GND_F407VE)
 
 ## License
 
