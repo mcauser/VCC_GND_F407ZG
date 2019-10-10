@@ -97,7 +97,7 @@ This board has a 25MHz system crystal oscillator.
 
 ### Peripherals
 
-# SPI Flash W25X40 (U5)
+#### SPI Flash W25X40 (U5)
 
 * 1 PC4 CS
 * 2 PA6 D0
@@ -108,7 +108,7 @@ This board has a 25MHz system crystal oscillator.
 * 7 3V3 HOLD
 * 8 3V3 VCC
 
-# NandFlash K9F5608 (U8)
+#### NandFlash K9F5608 (U8)
 
 * 6 GND
 * 7 PG6 R/B#
