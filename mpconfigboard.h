@@ -1,5 +1,10 @@
 #define MICROPY_HW_BOARD_NAME       "VCC-GND STM32F407ZG"
 #define MICROPY_HW_MCU_NAME         "STM32F407ZG"
+#define MICROPY_HW_FLASH_FS_LABEL   "VCCGNDF407ZG"
+
+// 1 = use internal flash (1 MByte)
+// 0 = use onboard SPI flash (512 KByte) Winbond W25X40
+#define MICROPY_HW_ENABLE_INTERNAL_FLASH_STORAGE (1)
 
 #define MICROPY_HW_HAS_FLASH        (1)
 #define MICROPY_HW_ENABLE_RNG       (1)
@@ -7,9 +12,6 @@
 #define MICROPY_HW_ENABLE_DAC       (1)
 #define MICROPY_HW_ENABLE_USB       (1)
 #define MICROPY_HW_ENABLE_SDCARD    (1)
-
-//#define MICROPY_HW_FLASH_FS_LABEL   "STM32F407ZG"
-// https://github.com/micropython/micropython/commit/3d5d76fb7384cd6c0bcd62f6a6799261b73f786d#diff-4a448575fb7cfab8e70659b57c9cb4cc
 
 // HSE is 25MHz
 #define MICROPY_HW_CLK_PLLM (25) // divide external clock by this to get 1MHz
@@ -70,7 +72,6 @@
 // I2C3_SMBA  PA9
 
 // AT24C08 EEPROM on I2C1 0x50-0x53
-// W25X40 SPI Flash (clk=PA5, dio=PA7, do=PA6, cs=PC4)
 
 // I2S busses - multiplexed with SPI2 and SPI3
 // I2S2_CK  PB10,PB13
@@ -112,6 +113,31 @@
 #define MICROPY_HW_LED1             (pin_G15) // blue
 #define MICROPY_HW_LED_ON(pin)      (mp_hal_pin_low(pin))
 #define MICROPY_HW_LED_OFF(pin)     (mp_hal_pin_high(pin))
+
+// If using onboard SPI flash
+#if !MICROPY_HW_ENABLE_INTERNAL_FLASH_STORAGE
+
+// W25X40 SPI Flash = 4 Mbit (512 KByte)
+#define MICROPY_HW_SPIFLASH_SIZE_BITS (4 * 1024 * 1024)
+#define MICROPY_HW_SPIFLASH_CS      (pin_C4)
+#define MICROPY_HW_SPIFLASH_SCK     (pin_A5)
+#define MICROPY_HW_SPIFLASH_MISO    (pin_A6)
+#define MICROPY_HW_SPIFLASH_MOSI    (pin_A7)
+
+#define MICROPY_BOARD_EARLY_INIT    VCC_GND_F407ZG_board_early_init
+void VCC_GND_F407ZG_board_early_init(void);
+
+extern const struct _mp_spiflash_config_t spiflash_config;
+extern struct _spi_bdev_t spi_bdev;
+#define MICROPY_HW_BDEV_IOCTL(op, arg) ( \
+    (op) == BDEV_IOCTL_NUM_BLOCKS ? (MICROPY_HW_SPIFLASH_SIZE_BITS / 8 / FLASH_BLOCK_SIZE) : \
+    (op) == BDEV_IOCTL_INIT ? spi_bdev_ioctl(&spi_bdev, (op), (uint32_t)&spiflash_config) : \
+    spi_bdev_ioctl(&spi_bdev, (op), (arg)) \
+)
+#define MICROPY_HW_BDEV_READBLOCKS(dest, bl, n) spi_bdev_readblocks(&spi_bdev, (dest), (bl), (n))
+#define MICROPY_HW_BDEV_WRITEBLOCKS(src, bl, n) spi_bdev_writeblocks(&spi_bdev, (src), (bl), (n))
+
+#endif
 
 // SD card detect switch
 #define MICROPY_HW_SDCARD_DETECT_PIN        (pin_F10)
